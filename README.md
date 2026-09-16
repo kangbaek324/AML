@@ -2,7 +2,7 @@
 
 이 레포지스토리는 거래소의 이상거래를 탐지하는 AML 시스템입니다.
 
-AML을 이해하고 학습하기 위한 PoC 목적으로 제작되었습니다.
+AML을 이해하고 학습하기 위한 PoC 목적으로 제작되었으며, 실제로 안정적으로 작동하기 위한 예외처리가 되어있지 않습니다.
 
 Kronex 가상 거래소 시스템을 기반으로 작동합니다.
 
@@ -11,6 +11,7 @@ Kronex 가상 거래소 시스템을 기반으로 작동합니다.
 ## Content
 
 - [System Architecture](#system-architecture)
+- [ERD](#erd)
 - [System WorkerFlow](#system-workerflow)
 - [Implement](#implement)
   - [Asset Tier](#asset-tier)
@@ -18,11 +19,61 @@ Kronex 가상 거래소 시스템을 기반으로 작동합니다.
   - [Rule-based Detection](#rule-based-detection)
   - [AML Manager Processing](#aml-manager-processing)
 - [How to Run](#how-to-run)
-- [Known Limitations](#known-limitations)
 
 ## System Architecture
 
 <img width="1215" height="901" alt="image" src="https://github.com/user-attachments/assets/c6d5ef4a-145b-4e87-8275-3bed76c0303b" />
+
+## ERD
+
+```mermaid
+erDiagram
+    users ||--o{ alerts : "has"
+    users ||--o{ cross_trading_count : "has"
+    alerts ||--o{ alert_trades : "has"
+    alerts ||--o{ alert_transfers : "has"
+
+    users {
+        int id PK
+        decimal average_asset
+        enum risk_level
+        enum asset_tier
+        datetime updated_at
+    }
+
+    alerts {
+        bigint id PK
+        int userId FK
+        enum type
+        text reason
+        enum status
+        datetime alerted_at
+        datetime processed_at
+    }
+
+    alert_trades {
+        int id PK
+        bigint alertId FK
+        bigint tradeId
+        datetime created_at
+    }
+
+    alert_transfers {
+        int id PK
+        bigint alertId FK
+        bigint transferId
+        datetime created_at
+    }
+
+    cross_trading_count {
+        int id PK
+        int userId FK
+        date date
+        int count
+        datetime created_at
+        datetime updated_at
+    }
+```
 
 ## System WorkerFlow
 
@@ -109,7 +160,7 @@ Alert가 발생하면 담당자 대시보드에 알림이 전송되고 담당자
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Go              | `1.26.1`                                                                                                                          |
 | Source Database | <a href="https://github.com/KRONEX-Stock-Exchange/kronex-server/blob/dev/prisma/schema.prisma">Kronex Server Database (0.6.5)</a> |
-| Database        | MySQL 8.0                                                                                                                         |
+| Database        | MySQL 8.0 (Source Database와 동일한 버전 사용)                                                                                    |
 
 AML Database와 Source Database는 같은 인스턴스 Database를 사용합니다.
 
@@ -124,10 +175,3 @@ AML Database와 Source Database는 같은 인스턴스 Database를 사용합니�
 ```bashW
 go run main.go
 ```
-
-## Known Limitations
-
-이 PoC는 AML 시스템의 핵심인 이상거래 탐지 로직 작성에 의의를 두어 아래 내용은 의도적으로 제외했습니다.
-
-- User Info Worker 작동 전 유저 가입 후 거래 발생으로 AML DB에 유저가 없는 레이스 컨디션 상황
-- Redis와 Source DB간의 복제 지연 미고려
