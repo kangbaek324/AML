@@ -1,6 +1,8 @@
 # AML PoC
 
-이 레포지스토리는 거래소의 이상거래 탐지 AML 시스템입니다. AML을 이해하고 학습하기 위한 PoC 목적으로 제작되었습니다.
+이 레포지스토리는 거래소의 이상거래를 탐지하는 AML 시스템입니다.
+
+AML을 이해하고 학습하기 위한 PoC 목적으로 제작되었습니다.
 
 Kronex 가상 거래소 시스템을 기반으로 작동합니다.
 
@@ -11,16 +13,16 @@ Kronex 가상 거래소 시스템을 기반으로 작동합니다.
 - [System Architecture](#system-architecture)
 - [System WorkerFlow](#system-workerflow)
 - [Implement](#implement)
-  - [Rules-based Validate Engine](#rules-based-validate-engine)
   - [Asset Tier](#asset-tier)
   - [User Risk](#user-risk)
+  - [Rule-based Detection](#rule-based-detection)
   - [AML Manager Processing](#aml-manager-processing)
 - [How to Run](#how-to-run)
 - [Known Limitations](#known-limitations)
 
 ## System Architecture
 
-<img width="1144" height="882" alt="image" src="https://github.com/user-attachments/assets/672d7c23-c558-4e9a-be8a-bbb850098633" />
+<img width="1215" height="901" alt="image" src="https://github.com/user-attachments/assets/c6d5ef4a-145b-4e87-8275-3bed76c0303b" />
 
 ## System WorkerFlow
 
@@ -33,39 +35,10 @@ flowchart LR
 
 ## Implement
 
-### Rules-based Validate Engine
-
-엔진에는 총 **3가지 시나리오**와 이에 기반한 Rule을 바탕으로 이상거래를 탐지 후 Alert 처리합니다.
-
-> 모든 시나리오는 개별 고루틴으로 동작합니다.
-
-#### 1. 단일 거래시 일정 금액 이상의 거래
-
-사용자의 Asset Tier에 비해 일정 금액 이상의 단일 거래시 Alert를 발생시킵니다.
-
-```
-단일 거래금액 >= (해당 등급의 평균 자산 * k)
-```
-
-```
-ex) k = 0.5
-  - 평균자산 2000만원 등급 유저가
-  - 단일 거래로 1000만원 이상 거래시 Alert
-```
-
-#### 2. 자전거래
-
-같은 유저 명의의 계좌끼리 거래가 발생시 자전거래 Alert를 발생시킵니다.
-
-#### 3. 비정상적인 입출금
-
-- **단일 송금**: 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
-
-- **누적 송금**: 한 시간 이내의 시간에 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
-
 ### Asset Tier
 
-유저의 평균 자산 규모를 기준으로 나눈 등급이며, Rules-based Validate Engine의 임계값을 스케일링하는 용도로 사용됩니다. 1시간 간격으로 갱신됩니다.
+유저의 평균 자산 규모를 기준으로 나눈 등급입니다.
+1시간 간격으로 갱신됩니다.
 
 |   등급   | 평균 자산 기준    | 단일 거래 임계값 (k=0.5) | 1시간 누적 임계값 |
 | :------: | ----------------- | ------------------------ | ----------------- |
@@ -91,6 +64,34 @@ ex) k = 0.5
 |  `LOW`   | 0 ~ 2회              |
 | `MEDIUM` | 3 ~ 5회              |
 |  `HIGH`  | 6회 이상             |
+
+### Rule-based Detection
+
+엔진에는 총 **3가지 시나리오**와 이에 기반한 Rule을 바탕으로 이상거래를 탐지 후 Alert 처리합니다.
+
+#### 1. 단일 거래시 일정 금액 이상의 거래
+
+사용자의 Asset Tier에 비해 일정 금액 이상의 단일 거래시 Alert를 발생시킵니다.
+
+```
+단일 거래금액 >= (해당 등급의 평균 자산 * k)
+```
+
+```
+ex) k = 0.5
+  - 평균자산 2000만원 등급 유저가
+  - 단일 거래로 1000만원 이상 거래시 Alert
+```
+
+#### 2. 자전거래
+
+같은 유저 명의의 계좌끼리 거래가 발생시 이를 카운트합니다. **UTC 기준 자정(00:00)에 카운트가 초기화**되며, 초기화 전까지 자전거래 횟수가 **100회**를 초과하면 Alert를 발생시킵니다.
+
+#### 3. 비정상적인 입출금
+
+- **단일 송금**: 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
+
+- **누적 송금**: 한 시간 이내의 시간에 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
 
 ### AML Manager Processing
 
