@@ -1,0 +1,130 @@
+# AML PoC
+
+이 레포지스토리는 거래소의 이상거래 탐지 AML 시스템입니다. AML을 이해하고 학습하기 위한 PoC 목적으로 제작되었습니다.
+
+Kronex 가상 거래소 시스템을 기반으로 작동합니다.
+
+<a href="https://github.com/orgs/KRONEX-Stock-Exchange/repositories">Kronex Repository↗</a>
+
+## Content
+
+- [System Architecture](#system-architecture)
+- [System WorkerFlow](#system-workerflow)
+- [Implement](#implement)
+  - [Rules-based Validate Engine](#rules-based-validate-engine)
+  - [Asset Tier](#asset-tier)
+  - [User Risk](#user-risk)
+  - [AML Manager Processing](#aml-manager-processing)
+- [How to Run](#how-to-run)
+- [Known Limitations](#known-limitations)
+
+## System Architecture
+
+<img width="1144" height="882" alt="image" src="https://github.com/user-attachments/assets/672d7c23-c558-4e9a-be8a-bbb850098633" />
+
+## System WorkerFlow
+
+```mermaid
+flowchart LR
+    A[거래데이터 조회] --> B[AML 엔진 룰 기반<br/>이상거래 탐지]
+    B -->|Alert 발생| C[담당자에게 알림]
+    C --> D[담당자 확인 후<br/>Alert 처리]
+```
+
+## Implement
+
+### Rules-based Validate Engine
+
+엔진에는 총 **3가지 시나리오**와 이에 기반한 Rule을 바탕으로 이상거래를 탐지 후 Alert 처리합니다.
+
+> 모든 시나리오는 개별 고루틴으로 동작합니다.
+
+#### 1. 단일 거래시 일정 금액 이상의 거래
+
+사용자의 Asset Tier에 비해 일정 금액 이상의 단일 거래시 Alert를 발생시킵니다.
+
+```
+단일 거래금액 >= (해당 등급의 평균 자산 * k)
+```
+
+```
+ex) k = 0.5
+  - 평균자산 2000만원 등급 유저가
+  - 단일 거래로 1000만원 이상 거래시 Alert
+```
+
+#### 2. 자전거래
+
+같은 유저 명의의 계좌끼리 거래가 발생시 자전거래 Alert를 발생시킵니다.
+
+#### 3. 비정상적인 입출금
+
+- **단일 송금**: 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
+
+- **누적 송금**: 한 시간 이내의 시간에 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
+
+### Asset Tier
+
+유저의 평균 자산 규모를 기준으로 나눈 등급이며, Rules-based Validate Engine의 임계값을 스케일링하는 용도로 사용됩니다. 1시간 간격으로 갱신됩니다.
+
+|   등급   | 평균 자산 기준    | 단일 거래 임계값 (k=0.5) | 1시간 누적 임계값 |
+| :------: | ----------------- | ------------------------ | ----------------- |
+|  `LOW`   | ~2,000만원        | 1,000만원 이상           | 2,000만원 이상    |
+| `MEDIUM` | 2,000만원 ~ 2억원 | 5,000만원 이상           | 1억원 이상        |
+|  `HIGH`  | 2억원 이상        | 1억원 이상               | 2억원 이상        |
+
+```
+단일 거래 임계값 = 등급 평균자산 * k
+1시간 누적 임계값 = 단일 거래 임계값 * 2
+
+(K 값은 임의로 조정가능)
+```
+
+### User Risk
+
+최근 한달 동안 누적된 유효한 Alert 발생 횟수를 기준으로 나눠집니다. 매달 1일 마다 갱신됩니다.
+
+> 유요한 Alert는 AML 담당자가 이상 거래로 판단한 Alert를 의미합니다.
+
+|   등급   | 최근 15일 Alert 횟수 |
+| :------: | -------------------- |
+|  `LOW`   | 0 ~ 2회              |
+| `MEDIUM` | 3 ~ 5회              |
+|  `HIGH`  | 6회 이상             |
+
+### AML Manager Processing
+
+Alert가 발생하면 담당자 대시보드에 알림이 전송되고 담당자가 Alert 사유, 관련 거래내역, 유저 정보를 확인 후 Alert를 처리합니다.
+
+(구현시 이미지로 대체 예정)
+
+## How to Run
+
+### Requirements
+
+| 항목            | 버전 / 값                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Go              | `1.26.1`                                                                                                                          |
+| Source Database | <a href="https://github.com/KRONEX-Stock-Exchange/kronex-server/blob/dev/prisma/schema.prisma">Kronex Server Database (0.6.5)</a> |
+| Database        | MySQL 8.0                                                                                                                         |
+
+AML Database와 Source Database는 같은 인스턴스 Database를 사용합니다.
+
+### Environment Variables
+
+```
+
+```
+
+### Run
+
+```bashW
+go run main.go
+```
+
+## Known Limitations
+
+이 PoC는 AML 시스템의 핵심인 이상거래 탐지 로직 작성에 의의를 두어 아래 내용은 의도적으로 제외했습니다.
+
+- User Info Worker 작동 전 유저 가입 후 거래 발생으로 AML DB에 유저가 없는 레이스 컨디션 상황
+- Redis와 Source DB간의 복제 지연 미고려
