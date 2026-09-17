@@ -15,3 +15,7 @@ export async function fetchAccountDetail(accountId: number): Promise<AccountDeta
   const { data } = await apiClient.get<AccountDetail>(`/api/v1/accounts/${accountId}`);
   return data;
 }
+
+export async function refreshUsers(): Promise<void> {
+  await apiClient.post("/api/v1/users/refresh");
+}
