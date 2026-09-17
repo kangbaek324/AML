@@ -9,6 +9,55 @@ import (
 	"context"
 )
 
+const listUserRiskLevels = `-- name: ListUserRiskLevels :many
+SELECT id, risk_level FROM users
+ORDER BY id
+`
+
+type ListUserRiskLevelsRow struct {
+	ID        uint32         `json:"id"`
+	RiskLevel UsersRiskLevel `json:"risk_level"`
+}
+
+func (q *Queries) ListUserRiskLevels(ctx context.Context) ([]ListUserRiskLevelsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUserRiskLevels)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListUserRiskLevelsRow{}
+	for rows.Next() {
+		var i ListUserRiskLevelsRow
+		if err := rows.Scan(&i.ID, &i.RiskLevel); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateUserRiskLevel = `-- name: UpdateUserRiskLevel :exec
+UPDATE users
+SET risk_level = ?
+WHERE id = ?
+`
+
+type UpdateUserRiskLevelParams struct {
+	RiskLevel UsersRiskLevel `json:"risk_level"`
+	ID        uint32         `json:"id"`
+}
+
+func (q *Queries) UpdateUserRiskLevel(ctx context.Context, arg UpdateUserRiskLevelParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserRiskLevel, arg.RiskLevel, arg.ID)
+	return err
+}
+
 const upsertUserAssetTier = `-- name: UpsertUserAssetTier :exec
 INSERT INTO users (id, average_asset, asset_tier)
 VALUES (?, ?, ?)

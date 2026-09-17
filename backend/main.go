@@ -10,7 +10,7 @@ import (
 	db "github.com/kangbaek324/AML/db/sqlc"
 	"github.com/kangbaek324/AML/internal/config"
 	"github.com/kangbaek324/AML/internal/router"
-	"github.com/kangbaek324/AML/internal/worker/userinfo"
+	"github.com/kangbaek324/AML/internal/worker"
 )
 
 func main() {
@@ -42,7 +42,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	userInfoWorker := userinfo.New(userinfo.NewAssetTierWorker(queries, sourceQueries))
+	userInfoWorker := worker.New(
+		worker.NewAssetTierWorker(queries, sourceQueries),
+		worker.NewUserRiskWorker(queries),
+	)
 	userInfoWorker.Start(ctx)
 
 	r := router.New()
