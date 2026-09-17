@@ -6,10 +6,10 @@ import (
 	sourcedb "github.com/kangbaek324/AML/db/source/sqlc"
 	db "github.com/kangbaek324/AML/db/sqlc"
 	"github.com/kangbaek324/AML/internal/handler"
-	"github.com/kangbaek324/AML/internal/worker"
+	"github.com/kangbaek324/AML/internal/worker/userinfo"
 )
 
-func New(queries *db.Queries, sourceQueries *sourcedb.Queries, w *worker.Worker) *gin.Engine {
+func New(queries *db.Queries, sourceQueries *sourcedb.Queries, w *userinfo.Manager) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.Default())
 

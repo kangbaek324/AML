@@ -1,4 +1,4 @@
-package worker
+package userinfo
 
 import (
 	"context"

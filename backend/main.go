@@ -10,8 +10,8 @@ import (
 	db "github.com/kangbaek324/AML/db/sqlc"
 	"github.com/kangbaek324/AML/internal/config"
 	"github.com/kangbaek324/AML/internal/router"
-	"github.com/kangbaek324/AML/internal/worker"
 	"github.com/kangbaek324/AML/internal/worker/rule"
+	"github.com/kangbaek324/AML/internal/worker/userinfo"
 )
 
 func main() {
@@ -43,20 +43,20 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	userInfoWorker := worker.New(
-		worker.NewAssetTierWorker(queries, sourceQueries),
-		worker.NewUserRiskWorker(queries),
+	userInfoManager := userinfo.New(
+		userinfo.NewAssetTierWorker(queries, sourceQueries),
+		userinfo.NewUserRiskWorker(queries),
 	)
-	userInfoWorker.Start(ctx)
+	userInfoManager.Start(ctx)
 
-	ruleEngine := rule.NewEngine(
+	ruleManager := rule.NewManager(
 		queries,
 		rule.NewLargeTransactionRule(queries, sourceQueries),
 		// 새 룰은 여기에 추가하면 자동으로 각자의 주기로 실행된다.
 	)
-	ruleEngine.Start(ctx)
+	ruleManager.Start(ctx)
 
-	r := router.New(queries, sourceQueries, userInfoWorker)
+	r := router.New(queries, sourceQueries, userInfoManager)
 
 	if err := r.Run(":" + cfg.AppPort); err != nil {
 		log.Fatalf("failed to run server: %v", err)
