@@ -14,6 +14,8 @@ type Querier interface {
 	ListUserRiskLevels(ctx context.Context) ([]ListUserRiskLevelsRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	UpdateUserRiskLevel(ctx context.Context, arg UpdateUserRiskLevelParams) error
+	// updated_at을 명시적으로 지정해, 값이 안 바뀌어도 "언제 마지막으로 체크했는지"가 갱신되도록 한다.
+	// (MySQL은 ON DUPLICATE KEY UPDATE에서 실제 값 변경이 없으면 ON UPDATE CURRENT_TIMESTAMP를 건너뛴다)
 	UpsertUserAssetTier(ctx context.Context, arg UpsertUserAssetTierParams) error
 }
 
