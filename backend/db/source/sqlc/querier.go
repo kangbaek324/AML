@@ -9,8 +9,11 @@ import (
 )
 
 type Querier interface {
+	GetAccount(ctx context.Context, id int32) (GetAccountRow, error)
 	GetUserCashBalance(ctx context.Context, userID int32) (interface{}, error)
 	GetUserStockValue(ctx context.Context, userID int32) (interface{}, error)
+	ListAccountsByUser(ctx context.Context, userID int32) ([]ListAccountsByUserRow, error)
+	ListStockHoldingsByAccount(ctx context.Context, accountID int32) ([]ListStockHoldingsByAccountRow, error)
 	ListUserIDs(ctx context.Context) ([]int32, error)
 }
 

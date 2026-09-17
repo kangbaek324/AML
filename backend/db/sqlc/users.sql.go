@@ -9,6 +9,25 @@ import (
 	"context"
 )
 
+const getUser = `-- name: GetUser :one
+SELECT id, average_asset, risk_level, asset_tier, updated_at FROM users
+WHERE id = ?
+LIMIT 1
+`
+
+func (q *Queries) GetUser(ctx context.Context, id uint32) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.AverageAsset,
+		&i.RiskLevel,
+		&i.AssetTier,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listUserRiskLevels = `-- name: ListUserRiskLevels :many
 SELECT id, risk_level FROM users
 ORDER BY id
@@ -29,6 +48,40 @@ func (q *Queries) ListUserRiskLevels(ctx context.Context) ([]ListUserRiskLevelsR
 	for rows.Next() {
 		var i ListUserRiskLevelsRow
 		if err := rows.Scan(&i.ID, &i.RiskLevel); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, average_asset, risk_level, asset_tier, updated_at FROM users
+ORDER BY id
+`
+
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.AverageAsset,
+			&i.RiskLevel,
+			&i.AssetTier,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

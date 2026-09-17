@@ -1,3 +1,12 @@
+-- name: ListUsers :many
+SELECT * FROM users
+ORDER BY id;
+
+-- name: GetUser :one
+SELECT * FROM users
+WHERE id = ?
+LIMIT 1;
+
 -- name: UpsertUserAssetTier :exec
 INSERT INTO users (id, average_asset, asset_tier)
 VALUES (?, ?, ?)

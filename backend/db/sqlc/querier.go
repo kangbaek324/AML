@@ -10,7 +10,9 @@ import (
 
 type Querier interface {
 	CountValidAlertsByUser(ctx context.Context, arg CountValidAlertsByUserParams) ([]CountValidAlertsByUserRow, error)
+	GetUser(ctx context.Context, id uint32) (User, error)
 	ListUserRiskLevels(ctx context.Context) ([]ListUserRiskLevelsRow, error)
+	ListUsers(ctx context.Context) ([]User, error)
 	UpdateUserRiskLevel(ctx context.Context, arg UpdateUserRiskLevelParams) error
 	UpsertUserAssetTier(ctx context.Context, arg UpsertUserAssetTierParams) error
 }

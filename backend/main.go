@@ -48,7 +48,7 @@ func main() {
 	)
 	userInfoWorker.Start(ctx)
 
-	r := router.New()
+	r := router.New(queries, sourceQueries)
 
 	if err := r.Run(":" + cfg.AppPort); err != nil {
 		log.Fatalf("failed to run server: %v", err)
