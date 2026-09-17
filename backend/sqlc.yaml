@@ -10,3 +10,13 @@ sql:
         emit_json_tags: true
         emit_interface: true
         emit_empty_slices: true
+  - engine: "mysql"
+    schema: "db/source/schema.sql"
+    queries: "db/source/query"
+    gen:
+      go:
+        package: "sourcedb"
+        out: "db/source/sqlc"
+        emit_json_tags: true
+        emit_interface: true
+        emit_empty_slices: true
