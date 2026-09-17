@@ -6,6 +6,7 @@ package sourcedb
 
 import (
 	"context"
+	"time"
 )
 
 type Querier interface {
@@ -14,6 +15,7 @@ type Querier interface {
 	GetUserStockValue(ctx context.Context, userID int32) (interface{}, error)
 	ListAccountsByUser(ctx context.Context, userID int32) ([]ListAccountsByUserRow, error)
 	ListStockHoldingsByAccount(ctx context.Context, accountID int32) ([]ListStockHoldingsByAccountRow, error)
+	ListTradesSince(ctx context.Context, matchedAt time.Time) ([]ListTradesSinceRow, error)
 	ListUserIDs(ctx context.Context) ([]int32, error)
 }
 

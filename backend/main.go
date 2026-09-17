@@ -11,6 +11,7 @@ import (
 	"github.com/kangbaek324/AML/internal/config"
 	"github.com/kangbaek324/AML/internal/router"
 	"github.com/kangbaek324/AML/internal/worker"
+	"github.com/kangbaek324/AML/internal/worker/rule"
 )
 
 func main() {
@@ -47,6 +48,13 @@ func main() {
 		worker.NewUserRiskWorker(queries),
 	)
 	userInfoWorker.Start(ctx)
+
+	ruleEngine := rule.NewEngine(
+		queries,
+		rule.NewLargeTransactionRule(queries, sourceQueries),
+		// 새 룰은 여기에 추가하면 자동으로 각자의 주기로 실행된다.
+	)
+	ruleEngine.Start(ctx)
 
 	r := router.New(queries, sourceQueries, userInfoWorker)
 

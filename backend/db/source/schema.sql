@@ -41,3 +41,23 @@ CREATE TABLE user_stocks (
     total_buy_amount    BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (account_id, stock_id)
 );
+
+CREATE TABLE orders (
+    id         BIGINT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    account_id INT             NOT NULL,
+    stock_id   INT             NOT NULL,
+    price      BIGINT UNSIGNED NOT NULL,
+    quantity   BIGINT UNSIGNED NOT NULL,
+    INDEX idx_orders_account_id (account_id)
+);
+
+CREATE TABLE trades (
+    id             BIGINT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    stock_id       INT             NOT NULL,
+    price          BIGINT UNSIGNED NOT NULL,
+    quantity       BIGINT UNSIGNED NOT NULL,
+    maker_order_id BIGINT          NOT NULL,
+    taker_order_id BIGINT          NOT NULL,
+    matched_at     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    INDEX idx_trades_matched_at (matched_at)
+);

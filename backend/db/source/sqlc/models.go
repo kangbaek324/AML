@@ -108,6 +108,14 @@ type Account struct {
 	CreatedAt        time.Time      `json:"created_at"`
 }
 
+type Order struct {
+	ID        int64  `json:"id"`
+	AccountID int32  `json:"account_id"`
+	StockID   int32  `json:"stock_id"`
+	Price     uint64 `json:"price"`
+	Quantity  uint64 `json:"quantity"`
+}
+
 type Stock struct {
 	ID           int32        `json:"id"`
 	Name         string       `json:"name"`
@@ -117,6 +125,16 @@ type Stock struct {
 	PublishedAt  sql.NullTime `json:"published_at"`
 	CreatedAt    time.Time    `json:"created_at"`
 	UpdatedAt    sql.NullTime `json:"updated_at"`
+}
+
+type Trade struct {
+	ID           int64     `json:"id"`
+	StockID      int32     `json:"stock_id"`
+	Price        uint64    `json:"price"`
+	Quantity     uint64    `json:"quantity"`
+	MakerOrderID int64     `json:"maker_order_id"`
+	TakerOrderID int64     `json:"taker_order_id"`
+	MatchedAt    time.Time `json:"matched_at"`
 }
 
 type User struct {

@@ -216,6 +216,12 @@ type CrossTradingCount struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type Cursor struct {
+	ID        uint32    `json:"id"`
+	Type      string    `json:"type"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
 type User struct {
 	ID           uint32         `json:"id"`
 	AverageAsset string         `json:"average_asset"`

@@ -45,3 +45,10 @@ CREATE TABLE cross_trading_count (
     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_user_date (userId, date)
 );
+
+CREATE TABLE cursors (
+    id        INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    type      VARCHAR(50)  NOT NULL,
+    timestamp DATETIME(3)  NOT NULL,
+    UNIQUE KEY uq_cursors_type (type)
+);

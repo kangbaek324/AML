@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -50,4 +51,34 @@ func (q *Queries) CountValidAlertsByUser(ctx context.Context, arg CountValidAler
 		return nil, err
 	}
 	return items, nil
+}
+
+const createAlert = `-- name: CreateAlert :execresult
+INSERT INTO alerts (userId, type, reason, status)
+VALUES (?, ?, ?, 'PENDING')
+`
+
+type CreateAlertParams struct {
+	Userid uint32     `json:"userid"`
+	Type   AlertsType `json:"type"`
+	Reason string     `json:"reason"`
+}
+
+func (q *Queries) CreateAlert(ctx context.Context, arg CreateAlertParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createAlert, arg.Userid, arg.Type, arg.Reason)
+}
+
+const linkAlertTrade = `-- name: LinkAlertTrade :exec
+INSERT INTO alert_trades (alertId, tradeId)
+VALUES (?, ?)
+`
+
+type LinkAlertTradeParams struct {
+	Alertid uint64 `json:"alertid"`
+	Tradeid uint64 `json:"tradeid"`
+}
+
+func (q *Queries) LinkAlertTrade(ctx context.Context, arg LinkAlertTradeParams) error {
+	_, err := q.db.ExecContext(ctx, linkAlertTrade, arg.Alertid, arg.Tradeid)
+	return err
 }
