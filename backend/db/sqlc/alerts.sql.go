@@ -195,3 +195,18 @@ func (q *Queries) ListAlerts(ctx context.Context) ([]Alert, error) {
 	}
 	return items, nil
 }
+
+const updateAlertStatus = `-- name: UpdateAlertStatus :execresult
+UPDATE alerts
+SET status = ?, processed_at = CURRENT_TIMESTAMP
+WHERE id = ? AND status = 'PENDING'
+`
+
+type UpdateAlertStatusParams struct {
+	Status AlertsStatus `json:"status"`
+	ID     uint64       `json:"id"`
+}
+
+func (q *Queries) UpdateAlertStatus(ctx context.Context, arg UpdateAlertStatusParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateAlertStatus, arg.Status, arg.ID)
+}

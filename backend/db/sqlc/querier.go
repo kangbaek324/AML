@@ -22,6 +22,7 @@ type Querier interface {
 	ListAlerts(ctx context.Context) ([]Alert, error)
 	ListUserRiskLevels(ctx context.Context) ([]ListUserRiskLevelsRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	UpdateAlertStatus(ctx context.Context, arg UpdateAlertStatusParams) (sql.Result, error)
 	UpdateUserRiskLevel(ctx context.Context, arg UpdateUserRiskLevelParams) error
 	UpsertCursor(ctx context.Context, arg UpsertCursorParams) error
 	// updated_at을 명시적으로 지정해, 값이 안 바뀌어도 "언제 마지막으로 체크했는지"가 갱신되도록 한다.

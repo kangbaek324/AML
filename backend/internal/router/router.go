@@ -25,6 +25,7 @@ func New(queries *db.Queries, sourceQueries *sourcedb.Queries, w *worker.Worker)
 		api.GET("/accounts/:id", h.GetAccount)
 		api.GET("/alerts", h.ListAlerts)
 		api.GET("/alerts/:id", h.GetAlert)
+		api.PATCH("/alerts/:id/status", h.UpdateAlertStatus)
 	}
 
 	return r

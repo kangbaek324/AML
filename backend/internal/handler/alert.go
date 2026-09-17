@@ -148,6 +148,50 @@ func (h *Handler) GetAlert(c *gin.Context) {
 	c.JSON(http.StatusOK, detail)
 }
 
+type updateAlertStatusRequest struct {
+	Status string `json:"status" binding:"required,oneof=NORMAL ABNORMAL"`
+}
+
+// UpdateAlertStatus godoc
+// PATCH /api/v1/alerts/:id/status
+// PENDING 상태인 Alert만 NORMAL/ABNORMAL로 처리할 수 있다.
+func (h *Handler) UpdateAlertStatus(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid alert id"})
+		return
+	}
+
+	var req updateAlertStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.Queries.UpdateAlertStatus(ctx, db.UpdateAlertStatusParams{
+		Status: db.AlertsStatus(req.Status),
+		ID:     id,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if affected == 0 {
+		c.JSON(http.StatusConflict, gin.H{"error": "alert not found or already processed"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 func toAlertSummary(a db.Alert) alertSummary {
 	s := alertSummary{
 		ID:        a.ID,

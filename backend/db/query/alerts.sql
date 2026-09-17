@@ -23,6 +23,11 @@ VALUES (?, ?, ?, 'PENDING');
 INSERT INTO alert_trades (alertId, tradeId)
 VALUES (?, ?);
 
+-- name: UpdateAlertStatus :execresult
+UPDATE alerts
+SET status = ?, processed_at = CURRENT_TIMESTAMP
+WHERE id = ? AND status = 'PENDING';
+
 -- name: CountValidAlertsByUser :many
 SELECT userId, COUNT(*) AS count
 FROM alerts

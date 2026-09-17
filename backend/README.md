@@ -62,7 +62,15 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
+
+    cursors {
+        int id PK
+        varchar type
+        datetime timestamp
+    }
 ```
+
+`cursors`는 다른 테이블과 관계가 없는 독립 테이블로, Rule-based Detection의 각 룰이 마지막으로 어디까지 조회했는지(워터마크)를 `type`(룰 이름)별로 저장합니다.
 
 ## System WorkerFlow
 
@@ -95,15 +103,15 @@ flowchart LR
 
 ### User Risk
 
-최근 한달 동안 누적된 유효한 Alert 발생 횟수를 기준으로 나눠집니다. 매달 1일 마다 갱신됩니다.
+지금 시점 기준 최근 30일간 누적된 유효한 Alert 발생 횟수를 기준으로 나눠집니다. 매달 1일마다, 그리고 서버 부팅/수동 새로고침 시에도 갱신됩니다.
 
 > 유요한 Alert는 AML 담당자가 이상 거래로 판단한 Alert를 의미합니다.
 
-|   등급   | 지난 달 1일 부터 발생한 Alert 횟수 |
-| :------: | ---------------------------------- |
-|  `LOW`   | 0 ~ 2회                            |
-| `MEDIUM` | 3 ~ 5회                            |
-|  `HIGH`  | 6회 이상                           |
+|   등급   | 최근 30일간 발생한 Alert 횟수 |
+| :------: | ------------------------------ |
+|  `LOW`   | 0 ~ 2회                        |
+| `MEDIUM` | 3 ~ 5회                        |
+|  `HIGH`  | 6회 이상                       |
 
 > User Risk 갱신시 등급이 하락하는 경우 한 단계씩 하락합니다.
 
@@ -165,7 +173,11 @@ DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=password
 DB_NAME=aml
+
+SOURCE_DB_NAME=stock
 ```
+
+`SOURCE_DB_NAME`은 Kronex Source Database의 이름입니다. AML DB와 같은 인스턴스, 같은 접속 계정을 쓰되 DB(스키마)만 다릅니다.
 
 ### Run
 

@@ -26,8 +26,8 @@ var userRiskByRank = []db.UsersRiskLevel{
 	db.UsersRiskLevelHIGH,
 }
 
-// UserRiskWorker는 지난 한 달간의 유효 Alert 발생 횟수를 집계해 유저의 risk_level을
-// 갱신한다. 등급 상승은 즉시 반영하고, 하락은 한 단계씩만 진행한다.
+// UserRiskWorker는 지금 시점 기준 최근 30일간의 유효 Alert 발생 횟수를 집계해
+// 유저의 risk_level을 갱신한다. 등급 상승은 즉시 반영하고, 하락은 한 단계씩만 진행한다.
 type UserRiskWorker struct {
 	queries *db.Queries
 }
@@ -55,9 +55,8 @@ func (w *UserRiskWorker) Start(ctx context.Context) {
 }
 
 func (w *UserRiskWorker) run(ctx context.Context) {
-	now := time.Now().UTC()
-	periodEnd := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-	periodStart := periodEnd.AddDate(0, -1, 0)
+	periodEnd := time.Now().UTC()
+	periodStart := periodEnd.AddDate(0, 0, -30)
 
 	counts, err := w.queries.CountValidAlertsByUser(ctx, db.CountValidAlertsByUserParams{
 		PeriodStart: periodStart,
