@@ -61,3 +61,13 @@ CREATE TABLE trades (
     matched_at     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     INDEX idx_trades_matched_at (matched_at)
 );
+
+CREATE TABLE transfers (
+    id                    BIGINT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    sender_account_id     INT             NOT NULL,
+    recipient_account_id  INT             NOT NULL,
+    amount                BIGINT UNSIGNED NOT NULL,
+    status                ENUM('RECEIVED','REJECTED','COMPLETED') NOT NULL DEFAULT 'RECEIVED',
+    completed_at          DATETIME(3)     NULL,
+    created_at            DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);

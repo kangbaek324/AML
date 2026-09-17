@@ -97,6 +97,49 @@ func (ns NullStocksStatus) Value() (driver.Value, error) {
 	return string(ns.StocksStatus), nil
 }
 
+type TransfersStatus string
+
+const (
+	TransfersStatusRECEIVED  TransfersStatus = "RECEIVED"
+	TransfersStatusREJECTED  TransfersStatus = "REJECTED"
+	TransfersStatusCOMPLETED TransfersStatus = "COMPLETED"
+)
+
+func (e *TransfersStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TransfersStatus(s)
+	case string:
+		*e = TransfersStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TransfersStatus: %T", src)
+	}
+	return nil
+}
+
+type NullTransfersStatus struct {
+	TransfersStatus TransfersStatus `json:"transfers_status"`
+	Valid           bool            `json:"valid"` // Valid is true if TransfersStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTransfersStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.TransfersStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TransfersStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTransfersStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TransfersStatus), nil
+}
+
 type Account struct {
 	ID               int32          `json:"id"`
 	UserID           int32          `json:"user_id"`
@@ -135,6 +178,16 @@ type Trade struct {
 	MakerOrderID int64     `json:"maker_order_id"`
 	TakerOrderID int64     `json:"taker_order_id"`
 	MatchedAt    time.Time `json:"matched_at"`
+}
+
+type Transfer struct {
+	ID                 int64           `json:"id"`
+	SenderAccountID    int32           `json:"sender_account_id"`
+	RecipientAccountID int32           `json:"recipient_account_id"`
+	Amount             uint64          `json:"amount"`
+	Status             TransfersStatus `json:"status"`
+	CompletedAt        sql.NullTime    `json:"completed_at"`
+	CreatedAt          time.Time       `json:"created_at"`
 }
 
 type User struct {

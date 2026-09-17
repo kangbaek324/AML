@@ -13,9 +13,13 @@ import (
 type Querier interface {
 	CountValidAlertsByUser(ctx context.Context, arg CountValidAlertsByUserParams) ([]CountValidAlertsByUserRow, error)
 	CreateAlert(ctx context.Context, arg CreateAlertParams) (sql.Result, error)
+	GetAlert(ctx context.Context, id uint64) (Alert, error)
 	GetCursor(ctx context.Context, type_ string) (time.Time, error)
 	GetUser(ctx context.Context, id uint32) (User, error)
 	LinkAlertTrade(ctx context.Context, arg LinkAlertTradeParams) error
+	ListAlertTradeIDs(ctx context.Context, alertid uint64) ([]uint64, error)
+	ListAlertTransferIDs(ctx context.Context, alertid uint64) ([]uint64, error)
+	ListAlerts(ctx context.Context) ([]Alert, error)
 	ListUserRiskLevels(ctx context.Context) ([]ListUserRiskLevelsRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	UpdateUserRiskLevel(ctx context.Context, arg UpdateUserRiskLevelParams) error

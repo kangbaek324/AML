@@ -11,6 +11,8 @@ import (
 
 type Querier interface {
 	GetAccount(ctx context.Context, id int32) (GetAccountRow, error)
+	GetTradeDetail(ctx context.Context, id int64) (GetTradeDetailRow, error)
+	GetTransferDetail(ctx context.Context, id int64) (GetTransferDetailRow, error)
 	GetUserCashBalance(ctx context.Context, userID int32) (interface{}, error)
 	GetUserStockValue(ctx context.Context, userID int32) (interface{}, error)
 	ListAccountsByUser(ctx context.Context, userID int32) ([]ListAccountsByUserRow, error)

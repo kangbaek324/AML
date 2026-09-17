@@ -23,6 +23,8 @@ func New(queries *db.Queries, sourceQueries *sourcedb.Queries, w *worker.Worker)
 		api.GET("/users/:id", h.GetUser)
 		api.POST("/users/refresh", h.RefreshUsers)
 		api.GET("/accounts/:id", h.GetAccount)
+		api.GET("/alerts", h.ListAlerts)
+		api.GET("/alerts/:id", h.GetAlert)
 	}
 
 	return r

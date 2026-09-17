@@ -68,6 +68,27 @@ func (q *Queries) CreateAlert(ctx context.Context, arg CreateAlertParams) (sql.R
 	return q.db.ExecContext(ctx, createAlert, arg.Userid, arg.Type, arg.Reason)
 }
 
+const getAlert = `-- name: GetAlert :one
+SELECT id, userid, type, reason, status, alerted_at, processed_at FROM alerts
+WHERE id = ?
+LIMIT 1
+`
+
+func (q *Queries) GetAlert(ctx context.Context, id uint64) (Alert, error) {
+	row := q.db.QueryRowContext(ctx, getAlert, id)
+	var i Alert
+	err := row.Scan(
+		&i.ID,
+		&i.Userid,
+		&i.Type,
+		&i.Reason,
+		&i.Status,
+		&i.AlertedAt,
+		&i.ProcessedAt,
+	)
+	return i, err
+}
+
 const linkAlertTrade = `-- name: LinkAlertTrade :exec
 INSERT INTO alert_trades (alertId, tradeId)
 VALUES (?, ?)
@@ -81,4 +102,96 @@ type LinkAlertTradeParams struct {
 func (q *Queries) LinkAlertTrade(ctx context.Context, arg LinkAlertTradeParams) error {
 	_, err := q.db.ExecContext(ctx, linkAlertTrade, arg.Alertid, arg.Tradeid)
 	return err
+}
+
+const listAlertTradeIDs = `-- name: ListAlertTradeIDs :many
+SELECT tradeId FROM alert_trades
+WHERE alertId = ?
+`
+
+func (q *Queries) ListAlertTradeIDs(ctx context.Context, alertid uint64) ([]uint64, error) {
+	rows, err := q.db.QueryContext(ctx, listAlertTradeIDs, alertid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []uint64{}
+	for rows.Next() {
+		var tradeid uint64
+		if err := rows.Scan(&tradeid); err != nil {
+			return nil, err
+		}
+		items = append(items, tradeid)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAlertTransferIDs = `-- name: ListAlertTransferIDs :many
+SELECT transferId FROM alert_transfers
+WHERE alertId = ?
+`
+
+func (q *Queries) ListAlertTransferIDs(ctx context.Context, alertid uint64) ([]uint64, error) {
+	rows, err := q.db.QueryContext(ctx, listAlertTransferIDs, alertid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []uint64{}
+	for rows.Next() {
+		var transferid uint64
+		if err := rows.Scan(&transferid); err != nil {
+			return nil, err
+		}
+		items = append(items, transferid)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAlerts = `-- name: ListAlerts :many
+SELECT id, userid, type, reason, status, alerted_at, processed_at FROM alerts
+ORDER BY alerted_at DESC
+`
+
+func (q *Queries) ListAlerts(ctx context.Context) ([]Alert, error) {
+	rows, err := q.db.QueryContext(ctx, listAlerts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Alert{}
+	for rows.Next() {
+		var i Alert
+		if err := rows.Scan(
+			&i.ID,
+			&i.Userid,
+			&i.Type,
+			&i.Reason,
+			&i.Status,
+			&i.AlertedAt,
+			&i.ProcessedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

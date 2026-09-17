@@ -1,3 +1,20 @@
+-- name: ListAlerts :many
+SELECT * FROM alerts
+ORDER BY alerted_at DESC;
+
+-- name: GetAlert :one
+SELECT * FROM alerts
+WHERE id = ?
+LIMIT 1;
+
+-- name: ListAlertTradeIDs :many
+SELECT tradeId FROM alert_trades
+WHERE alertId = ?;
+
+-- name: ListAlertTransferIDs :many
+SELECT transferId FROM alert_transfers
+WHERE alertId = ?;
+
 -- name: CreateAlert :execresult
 INSERT INTO alerts (userId, type, reason, status)
 VALUES (?, ?, ?, 'PENDING');

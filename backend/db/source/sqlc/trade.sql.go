@@ -10,6 +10,49 @@ import (
 	"time"
 )
 
+const getTradeDetail = `-- name: GetTradeDetail :one
+SELECT
+    t.id AS trade_id,
+    t.stock_id,
+    t.quantity,
+    t.price,
+    t.matched_at,
+    ma.user_id AS maker_user_id,
+    ka.user_id AS taker_user_id
+FROM trades t
+JOIN orders mo ON mo.id = t.maker_order_id
+JOIN accounts ma ON ma.id = mo.account_id
+JOIN orders ko ON ko.id = t.taker_order_id
+JOIN accounts ka ON ka.id = ko.account_id
+WHERE t.id = ?
+LIMIT 1
+`
+
+type GetTradeDetailRow struct {
+	TradeID     int64     `json:"trade_id"`
+	StockID     int32     `json:"stock_id"`
+	Quantity    uint64    `json:"quantity"`
+	Price       uint64    `json:"price"`
+	MatchedAt   time.Time `json:"matched_at"`
+	MakerUserID int32     `json:"maker_user_id"`
+	TakerUserID int32     `json:"taker_user_id"`
+}
+
+func (q *Queries) GetTradeDetail(ctx context.Context, id int64) (GetTradeDetailRow, error) {
+	row := q.db.QueryRowContext(ctx, getTradeDetail, id)
+	var i GetTradeDetailRow
+	err := row.Scan(
+		&i.TradeID,
+		&i.StockID,
+		&i.Quantity,
+		&i.Price,
+		&i.MatchedAt,
+		&i.MakerUserID,
+		&i.TakerUserID,
+	)
+	return i, err
+}
+
 const listTradesSince = `-- name: ListTradesSince :many
 SELECT
     t.id AS trade_id,
