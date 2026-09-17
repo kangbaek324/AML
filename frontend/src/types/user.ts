@@ -2,6 +2,12 @@ export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
 export type AssetTier = "LOW" | "MEDIUM" | "HIGH";
 export type AccountStatus = "PENDING" | "ACTIVE";
 
+export const LEVEL_RANK: Record<RiskLevel | AssetTier, number> = {
+  LOW: 0,
+  MEDIUM: 1,
+  HIGH: 2,
+};
+
 export interface User {
   id: number;
   average_asset: string;
