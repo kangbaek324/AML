@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
-import type { Alert, AlertDetail } from "../../types/alert";
-import { fetchAlertDetail } from "../../services/api/alerts";
+import type { Alert, AlertDetail, AlertStatus } from "../../types/alert";
+import { fetchAlertDetail, updateAlertStatus } from "../../services/api/alerts";
 import { formatDateTime, formatWon } from "../../utils/format";
 
 interface AlertRowProps {
@@ -26,11 +26,70 @@ function DetailRow({ label, children }: { label: string; children: ReactNode }) 
   );
 }
 
+const badgeClass = "rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-600";
+
+interface AlertStatusCellProps {
+  alertId: number;
+  status: AlertStatus;
+  onChanged: (status: AlertStatus) => void;
+}
+
+function AlertStatusCell({ alertId, status, onChanged }: AlertStatusCellProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
+
+  if (status !== "PENDING") {
+    return <span className={badgeClass}>{status}</span>;
+  }
+
+  function handlePick(next: "NORMAL" | "ABNORMAL") {
+    setMenuOpen(false);
+    if (!window.confirm(`이 Alert를 ${next}(으)로 변경하시겠습니까?`)) {
+      return;
+    }
+
+    setUpdating(true);
+    updateAlertStatus(alertId, next)
+      .then(() => onChanged(next))
+      .catch(() => window.alert("상태 변경에 실패했습니다."))
+      .finally(() => setUpdating(false));
+  }
+
+  if (menuOpen) {
+    return (
+      <span className="inline-flex gap-1">
+        <button type="button" onClick={() => handlePick("NORMAL")} className={`${badgeClass} hover:bg-gray-100`}>
+          NORMAL
+        </button>
+        <button
+          type="button"
+          onClick={() => handlePick("ABNORMAL")}
+          className={`${badgeClass} hover:bg-gray-100`}
+        >
+          ABNORMAL
+        </button>
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setMenuOpen(true)}
+      disabled={updating}
+      className={`${badgeClass} hover:bg-gray-100 disabled:opacity-50`}
+    >
+      {updating ? "변경중..." : status}
+    </button>
+  );
+}
+
 export function AlertRow({ alert }: AlertRowProps) {
   const [expanded, setExpanded] = useState(false);
   const [detail, setDetail] = useState<AlertDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<AlertStatus>(alert.status);
 
   function handleToggle() {
     setExpanded((prev) => !prev);
@@ -47,10 +106,9 @@ export function AlertRow({ alert }: AlertRowProps) {
 
   return (
     <div className="border-b border-gray-200">
-      <button
-        type="button"
+      <div
         onClick={handleToggle}
-        className="grid w-full grid-cols-[3rem_4rem_9rem_1fr_10rem_5rem] gap-4 px-4 py-3 text-left text-sm text-gray-900 hover:bg-gray-100"
+        className="grid w-full cursor-pointer grid-cols-[3rem_4rem_9rem_1fr_12rem_11rem] items-center gap-4 px-4 py-3 text-sm text-gray-900 hover:bg-gray-100"
       >
         <span>
           <span className="mr-1 inline-block w-3 text-gray-400">{expanded ? "▾" : "▸"}</span>
@@ -58,20 +116,16 @@ export function AlertRow({ alert }: AlertRowProps) {
         </span>
         <span>{alert.user_id}</span>
         <span>
-          <span className="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-600">
-            {alert.type}
-          </span>
+          <span className={badgeClass}>{alert.type}</span>
         </span>
         <span className="truncate text-gray-700" title={alert.reason}>
           {alert.reason}
         </span>
         <span className="text-gray-500">{formatDateTime(alert.alerted_at)}</span>
-        <span className="text-right">
-          <span className="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-600">
-            {alert.status}
-          </span>
+        <span className="text-right" onClick={(e) => e.stopPropagation()}>
+          <AlertStatusCell alertId={alert.id} status={status} onChanged={setStatus} />
         </span>
-      </button>
+      </div>
 
       {expanded && (
         <div className="space-y-2 bg-gray-50 py-3 pl-10 pr-4 text-sm">

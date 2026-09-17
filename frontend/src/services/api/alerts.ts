@@ -10,3 +10,10 @@ export async function fetchAlertDetail(alertId: number): Promise<AlertDetail> {
   const { data } = await apiClient.get<AlertDetail>(`/api/v1/alerts/${alertId}`);
   return data;
 }
+
+export async function updateAlertStatus(
+  alertId: number,
+  status: "NORMAL" | "ABNORMAL",
+): Promise<void> {
+  await apiClient.patch(`/api/v1/alerts/${alertId}/status`, { status });
+}
