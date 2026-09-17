@@ -17,3 +17,9 @@ func (w *Worker) Start(ctx context.Context) {
 	go w.assetTier.Start(ctx)
 	go w.userRisk.Start(ctx)
 }
+
+// RunNow는 스케줄과 무관하게 즉시 전체 유저 정보를 갱신한다 (수동 갱신 API용).
+func (w *Worker) RunNow(ctx context.Context) {
+	w.assetTier.run(ctx)
+	w.userRisk.run(ctx)
+}
