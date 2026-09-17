@@ -212,6 +212,7 @@ type CrossTradingCount struct {
 	Userid    uint32    `json:"userid"`
 	Date      time.Time `json:"date"`
 	Count     uint32    `json:"count"`
+	Alerted   bool      `json:"alerted"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

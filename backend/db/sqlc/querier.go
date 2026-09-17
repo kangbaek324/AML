@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	ClaimCrossTradingAlert(ctx context.Context, arg ClaimCrossTradingAlertParams) (sql.Result, error)
 	CountValidAlertsByUser(ctx context.Context, arg CountValidAlertsByUserParams) ([]CountValidAlertsByUserRow, error)
 	CreateAlert(ctx context.Context, arg CreateAlertParams) (sql.Result, error)
 	GetAlert(ctx context.Context, id uint64) (Alert, error)
@@ -24,6 +25,7 @@ type Querier interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	UpdateAlertStatus(ctx context.Context, arg UpdateAlertStatusParams) (sql.Result, error)
 	UpdateUserRiskLevel(ctx context.Context, arg UpdateUserRiskLevelParams) error
+	UpsertCrossTradingCount(ctx context.Context, arg UpsertCrossTradingCountParams) (sql.Result, error)
 	UpsertCursor(ctx context.Context, arg UpsertCursorParams) error
 	// updated_at을 명시적으로 지정해, 값이 안 바뀌어도 "언제 마지막으로 체크했는지"가 갱신되도록 한다.
 	// (MySQL은 ON DUPLICATE KEY UPDATE에서 실제 값 변경이 없으면 ON UPDATE CURRENT_TIMESTAMP를 건너뛴다)

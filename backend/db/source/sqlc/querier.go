@@ -16,6 +16,7 @@ type Querier interface {
 	GetUserCashBalance(ctx context.Context, userID int32) (interface{}, error)
 	GetUserStockValue(ctx context.Context, userID int32) (interface{}, error)
 	ListAccountsByUser(ctx context.Context, userID int32) ([]ListAccountsByUserRow, error)
+	ListSelfTradesByUserAndDate(ctx context.Context, arg ListSelfTradesByUserAndDateParams) ([]ListSelfTradesByUserAndDateRow, error)
 	ListStockHoldingsByAccount(ctx context.Context, accountID int32) ([]ListStockHoldingsByAccountRow, error)
 	ListTradesSince(ctx context.Context, matchedAt time.Time) ([]ListTradesSinceRow, error)
 	ListUserIDs(ctx context.Context) ([]int32, error)
