@@ -1,0 +1,1 @@
+ALTER TABLE users MODIFY average_asset DECIMAL(18,2) NOT NULL DEFAULT 0;

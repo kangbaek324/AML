@@ -1,6 +1,6 @@
 CREATE TABLE users (
     id             INT UNSIGNED    NOT NULL PRIMARY KEY,
-    average_asset  DECIMAL(18,2)   NOT NULL DEFAULT 0,
+    average_asset  DECIMAL(30,2)   NOT NULL DEFAULT 0,
     risk_level     ENUM('LOW','MEDIUM','HIGH') NOT NULL DEFAULT 'LOW',
     asset_tier     ENUM('LOW','MEDIUM','HIGH') NOT NULL DEFAULT 'LOW',
     updated_at     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
