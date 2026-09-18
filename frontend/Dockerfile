@@ -8,8 +8,10 @@ COPY . .
 RUN npm run build
 
 FROM nginx:alpine
+
+ENV API_BASE_URL=""
+
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 EXPOSE 81
-CMD ["nginx", "-g", "daemon off;"]

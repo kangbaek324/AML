@@ -1,0 +1,17 @@
+server {
+    listen 81;
+    server_name localhost;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location = /config.js {
+        default_type application/javascript;
+        add_header Cache-Control "no-store";
+        return 200 'window.__APP_CONFIG__ = { apiBaseUrl: "${API_BASE_URL}" };';
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
