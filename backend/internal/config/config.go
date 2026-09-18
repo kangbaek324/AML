@@ -47,7 +47,7 @@ func (c *Config) SourceDSN() string {
 }
 
 func (c *Config) dsnFor(dbName string) string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&multiStatements=true",
 		c.DBUser, c.DBPassword, c.DBHost, c.DBPort, dbName)
 }
 
