@@ -47,6 +47,17 @@ CREATE TABLE cross_trading_count (
     UNIQUE KEY uq_user_date (userId, date)
 );
 
+CREATE TABLE transfer_hour_sum (
+    id         INT UNSIGNED    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    userId     INT UNSIGNED    NOT NULL,
+    hour       DATETIME        NOT NULL,
+    amount     BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    alerted    BOOLEAN         NOT NULL DEFAULT FALSE,
+    created_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_user_hour (userId, hour)
+);
+
 CREATE TABLE cursors (
     id        INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     type      VARCHAR(50)  NOT NULL,

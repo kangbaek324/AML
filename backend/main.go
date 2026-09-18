@@ -53,6 +53,7 @@ func main() {
 		queries,
 		rule.NewLargeTransactionRule(queries, sourceQueries),
 		rule.NewCrossTradingRule(queries, sourceQueries),
+		rule.NewAbnormalTransferRule(queries, sourceQueries),
 		// 새 룰은 여기에 추가하면 자동으로 각자의 주기로 실행된다.
 	)
 	ruleManager.Start(ctx)

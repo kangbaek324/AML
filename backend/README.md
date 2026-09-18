@@ -19,6 +19,7 @@
 erDiagram
     users ||--o{ alerts : "has"
     users ||--o{ cross_trading_count : "has"
+    users ||--o{ transfer_hour_sum : "has"
     alerts ||--o{ alert_trades : "has"
     alerts ||--o{ alert_transfers : "has"
 
@@ -59,6 +60,16 @@ erDiagram
         int userId FK
         date date
         int count
+        boolean alerted
+        datetime created_at
+        datetime updated_at
+    }
+
+    transfer_hour_sum {
+        int id PK
+        int userId FK
+        datetime hour
+        bigint amount
         boolean alerted
         datetime created_at
         datetime updated_at
@@ -140,15 +151,15 @@ ex) k = 0.5
 
 #### 3. 비정상적인 입출금
 
-- **단일 송금**: 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
+- **단일 송금**: 받은 송금액이 **1,000만원** 이상일시 Alert를 발생시킵니다.
 
-- **누적 송금**: 한 시간 이내의 시간에 받은 송금액이 Asset Tier에 따른 단일 거래 임계값 이상일시 Alert를 발생시킵니다.
+- **누적 송금**: 정시 단위(예: 13:00~14:00)로 받은 송금액을 합산해 **1,000만원**을 초과하면 Alert를 발생시킵니다. Alert는 해당 시간대에 한 번만 발생하며, 이후 발생하는 송금은 합산만 될 뿐 추가 Alert를 발생시키지 않습니다.
 
 ### AML Manager Processing
 
 Alert가 발생하면 담당자 대시보드에 알림이 전송되고 담당자가 Alert 사유, 관련 거래내역, 유저 정보를 확인 후 Alert를 처리합니다.
 
-(구현시 이미지로 대체 예정)
+화면 관련 자세한 문서는 [프론트엔드 문서](../frontend/README.md)를 참고하세요.
 
 ## How to Run
 

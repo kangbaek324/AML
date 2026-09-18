@@ -6,6 +6,7 @@ package sourcedb
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -16,9 +17,11 @@ type Querier interface {
 	GetUserCashBalance(ctx context.Context, userID int32) (interface{}, error)
 	GetUserStockValue(ctx context.Context, userID int32) (interface{}, error)
 	ListAccountsByUser(ctx context.Context, userID int32) ([]ListAccountsByUserRow, error)
+	ListReceivedTransfersByUserAndHour(ctx context.Context, arg ListReceivedTransfersByUserAndHourParams) ([]ListReceivedTransfersByUserAndHourRow, error)
 	ListSelfTradesByUserAndDate(ctx context.Context, arg ListSelfTradesByUserAndDateParams) ([]ListSelfTradesByUserAndDateRow, error)
 	ListStockHoldingsByAccount(ctx context.Context, accountID int32) ([]ListStockHoldingsByAccountRow, error)
 	ListTradesSince(ctx context.Context, matchedAt time.Time) ([]ListTradesSinceRow, error)
+	ListTransfersSince(ctx context.Context, completedAt sql.NullTime) ([]ListTransfersSinceRow, error)
 	ListUserIDs(ctx context.Context) ([]int32, error)
 }
 

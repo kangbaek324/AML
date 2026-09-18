@@ -104,6 +104,21 @@ func (q *Queries) LinkAlertTrade(ctx context.Context, arg LinkAlertTradeParams) 
 	return err
 }
 
+const linkAlertTransfer = `-- name: LinkAlertTransfer :exec
+INSERT INTO alert_transfers (alertId, transferId)
+VALUES (?, ?)
+`
+
+type LinkAlertTransferParams struct {
+	Alertid    uint64 `json:"alertid"`
+	Transferid uint64 `json:"transferid"`
+}
+
+func (q *Queries) LinkAlertTransfer(ctx context.Context, arg LinkAlertTransferParams) error {
+	_, err := q.db.ExecContext(ctx, linkAlertTransfer, arg.Alertid, arg.Transferid)
+	return err
+}
+
 const listAlertTradeIDs = `-- name: ListAlertTradeIDs :many
 SELECT tradeId FROM alert_trades
 WHERE alertId = ?

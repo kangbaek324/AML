@@ -12,12 +12,15 @@ import (
 
 type Querier interface {
 	ClaimCrossTradingAlert(ctx context.Context, arg ClaimCrossTradingAlertParams) (sql.Result, error)
+	ClaimTransferAlert(ctx context.Context, arg ClaimTransferAlertParams) (sql.Result, error)
 	CountValidAlertsByUser(ctx context.Context, arg CountValidAlertsByUserParams) ([]CountValidAlertsByUserRow, error)
 	CreateAlert(ctx context.Context, arg CreateAlertParams) (sql.Result, error)
 	GetAlert(ctx context.Context, id uint64) (Alert, error)
 	GetCursor(ctx context.Context, type_ string) (time.Time, error)
+	GetTransferHourSum(ctx context.Context, arg GetTransferHourSumParams) (uint64, error)
 	GetUser(ctx context.Context, id uint32) (User, error)
 	LinkAlertTrade(ctx context.Context, arg LinkAlertTradeParams) error
+	LinkAlertTransfer(ctx context.Context, arg LinkAlertTransferParams) error
 	ListAlertTradeIDs(ctx context.Context, alertid uint64) ([]uint64, error)
 	ListAlertTransferIDs(ctx context.Context, alertid uint64) ([]uint64, error)
 	ListAlerts(ctx context.Context) ([]Alert, error)
@@ -27,6 +30,7 @@ type Querier interface {
 	UpdateUserRiskLevel(ctx context.Context, arg UpdateUserRiskLevelParams) error
 	UpsertCrossTradingCount(ctx context.Context, arg UpsertCrossTradingCountParams) (sql.Result, error)
 	UpsertCursor(ctx context.Context, arg UpsertCursorParams) error
+	UpsertTransferHourSum(ctx context.Context, arg UpsertTransferHourSumParams) error
 	// updated_at을 명시적으로 지정해, 값이 안 바뀌어도 "언제 마지막으로 체크했는지"가 갱신되도록 한다.
 	// (MySQL은 ON DUPLICATE KEY UPDATE에서 실제 값 변경이 없으면 ON UPDATE CURRENT_TIMESTAMP를 건너뛴다)
 	UpsertUserAssetTier(ctx context.Context, arg UpsertUserAssetTierParams) error

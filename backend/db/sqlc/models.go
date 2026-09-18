@@ -223,6 +223,16 @@ type Cursor struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
+type TransferHourSum struct {
+	ID        uint32    `json:"id"`
+	Userid    uint32    `json:"userid"`
+	Hour      time.Time `json:"hour"`
+	Amount    uint64    `json:"amount"`
+	Alerted   bool      `json:"alerted"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type User struct {
 	ID           uint32         `json:"id"`
 	AverageAsset string         `json:"average_asset"`

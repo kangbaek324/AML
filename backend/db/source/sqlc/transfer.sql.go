@@ -51,3 +51,100 @@ func (q *Queries) GetTransferDetail(ctx context.Context, id int64) (GetTransferD
 	)
 	return i, err
 }
+
+const listReceivedTransfersByUserAndHour = `-- name: ListReceivedTransfersByUserAndHour :many
+SELECT
+    t.id AS transfer_id,
+    t.amount,
+    t.completed_at
+FROM transfers t
+JOIN accounts ra ON ra.id = t.recipient_account_id
+WHERE ra.user_id = ?
+  AND t.status = 'COMPLETED'
+  AND t.completed_at >= ?
+  AND t.completed_at < ?
+ORDER BY t.completed_at
+`
+
+type ListReceivedTransfersByUserAndHourParams struct {
+	UserID    int32        `json:"user_id"`
+	HourStart sql.NullTime `json:"hour_start"`
+	HourEnd   sql.NullTime `json:"hour_end"`
+}
+
+type ListReceivedTransfersByUserAndHourRow struct {
+	TransferID  int64        `json:"transfer_id"`
+	Amount      uint64       `json:"amount"`
+	CompletedAt sql.NullTime `json:"completed_at"`
+}
+
+func (q *Queries) ListReceivedTransfersByUserAndHour(ctx context.Context, arg ListReceivedTransfersByUserAndHourParams) ([]ListReceivedTransfersByUserAndHourRow, error) {
+	rows, err := q.db.QueryContext(ctx, listReceivedTransfersByUserAndHour, arg.UserID, arg.HourStart, arg.HourEnd)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListReceivedTransfersByUserAndHourRow{}
+	for rows.Next() {
+		var i ListReceivedTransfersByUserAndHourRow
+		if err := rows.Scan(&i.TransferID, &i.Amount, &i.CompletedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTransfersSince = `-- name: ListTransfersSince :many
+SELECT
+    t.id AS transfer_id,
+    t.amount,
+    t.completed_at,
+    ra.user_id AS recipient_user_id
+FROM transfers t
+JOIN accounts ra ON ra.id = t.recipient_account_id
+WHERE t.status = 'COMPLETED'
+  AND t.completed_at > ?
+ORDER BY t.completed_at
+`
+
+type ListTransfersSinceRow struct {
+	TransferID      int64        `json:"transfer_id"`
+	Amount          uint64       `json:"amount"`
+	CompletedAt     sql.NullTime `json:"completed_at"`
+	RecipientUserID int32        `json:"recipient_user_id"`
+}
+
+func (q *Queries) ListTransfersSince(ctx context.Context, completedAt sql.NullTime) ([]ListTransfersSinceRow, error) {
+	rows, err := q.db.QueryContext(ctx, listTransfersSince, completedAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListTransfersSinceRow{}
+	for rows.Next() {
+		var i ListTransfersSinceRow
+		if err := rows.Scan(
+			&i.TransferID,
+			&i.Amount,
+			&i.CompletedAt,
+			&i.RecipientUserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -23,6 +23,10 @@ VALUES (?, ?, ?, 'PENDING');
 INSERT INTO alert_trades (alertId, tradeId)
 VALUES (?, ?);
 
+-- name: LinkAlertTransfer :exec
+INSERT INTO alert_transfers (alertId, transferId)
+VALUES (?, ?);
+
 -- name: UpdateAlertStatus :execresult
 UPDATE alerts
 SET status = ?, processed_at = CURRENT_TIMESTAMP
