@@ -16,5 +16,5 @@ Kronex 가상 거래소 시스템을 기반으로 작동합니다.
 
 ## System Architecture
 
-<img width="1215" height="901" alt="image" src="https://github.com/user-attachments/assets/c6d5ef4a-145b-4e87-8275-3bed76c0303b" />
+<img width="1215" height="901" alt="image" src="./docs/image/sys_arc.png" />
 
