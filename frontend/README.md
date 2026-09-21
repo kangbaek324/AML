@@ -2,6 +2,15 @@
 
 AML 담당자용 대시보드 프론트엔드입니다. [Rule-based Detection](../backend/README.md#rule-based-detection)으로 발생한 Alert를 담당자가 확인하고 처리하는 화면을 제공합니다.
 
+## Content
+
+- [Structure](#structure)
+- [Implement](#implement)
+  - [Dashboard](#dashboard)
+  - [Alerts](#alerts)
+- [How to Run](#how-to-run)
+- [Deploy](#deploy)
+
 ## Structure
 
 ```
@@ -15,6 +24,24 @@ src/
 ├── constants/    # 상수
 └── router.tsx    # 라우트 정의
 ```
+
+## Implement
+
+### Dashboard
+
+유저별 평균 자산, 위험도, 자산 등급을 조회합니다. 행을 펼치면 계좌 목록이, 계좌를 펼치면 보유 종목까지 드릴다운됩니다.
+
+<img width="1000" alt="Dashboard 목록" src="../docs/image/fe_1.png" />
+<img width="1000" alt="Dashboard 드릴다운" src="../docs/image/fe_2.png" />
+
+### Alerts
+
+Rule-based Detection이 발생시킨 Alert 목록을 상태(PENDING/NORMAL/ABNORMAL)와 함께 보여줍니다. 행을 펼치면 Alert 판단 근거가 된 거래/이체 내역을 확인할 수 있습니다.
+
+PENDING 상태일 경우 클릭해 상태를 바꿀 수 있습니다.
+
+<img width="1000" alt="Alerts 목록" src="../docs/image/fe_3.png" />
+<img width="1000" alt="Alert 상세" src="../docs/image/fe_4.png" />
 
 ## How to Run
 
