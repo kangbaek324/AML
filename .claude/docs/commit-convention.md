@@ -2,15 +2,16 @@
 
 커밋 메시지는 `type(scope): message` 형식을 따른다.
 
-- **type**: `feat`, `fix`, `refactor`, `docs`, `chore`
-- **scope**: `backend`, `frontend`
+- **type**: 어떤 행위인지를 나타낸다. `feat`, `fix`, `refactor`, `chore`
+- **scope**: 어떤 영역을 건드렸는지를 나타낸다. `backend`, `frontend`, `docs`. 영역이 겹치면 `-`로 조합한다 (예: `frontend-docs`)
 
 예시:
 
 ```
 feat(backend): 유저 기능 추가
 fix(frontend): 로그인 버튼 클릭 오류 수정
-docs(backend): README 갱신
+feat(docs): 프로젝트 개요 문서 추가
+feat(frontend-docs): 화면 스크린샷 추가
 ```
 
 ## 커밋 범위
